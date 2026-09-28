@@ -84,43 +84,45 @@ function buildDicePipsFont(name, scale) {
   return { name, rows: 3, scale, glyphs };
 }
 
-// --- Font "codice a barre": l'altezza della barra segue il valore della cifra -------
-function buildBarCodeFont(name, scale) {
-  const rows = 7;
+// --- Font disegnati a mano: ogni cifra come righe di testo ('#' = acceso) --------------
+function buildRowFont(name, scale, rowsByChar) {
   const glyphs = {};
-  for (let d = 0; d <= 9; d++) {
-    const h = Math.max(1, Math.round((d / 9) * rows));
-    const bits = ((1 << h) - 1) << (rows - h);
-    glyphs[String(d)] = [bits, bits, bits];
+  let rows = 0;
+  for (const [ch, lines] of Object.entries(rowsByChar)) {
+    rows = lines.length;
+    const w = lines[0].length;
+    glyphs[ch] = [];
+    for (let x = 0; x < w; x++) {
+      let bits = 0;
+      lines.forEach((line, y) => { if (line[x] === '#') bits |= 1 << y; });
+      glyphs[ch].push(bits);
+    }
   }
-  glyphs[':'] = [(1 << 1) | (1 << 5)];
   return { name, rows, scale, glyphs };
 }
 
-// --- Font "Braille": celle a 6 punti, i numerali standard Braille -------------------
-function buildBrailleFont(name, scale) {
-  // dot1=(0,0) dot2=(0,1) dot3=(0,2) dot4=(1,0) dot5=(1,1) dot6=(1,2)
-  const DOTS = {
-    1: [[0, 0]],
-    2: [[0, 0], [0, 1]],
-    3: [[0, 0], [1, 0]],
-    4: [[0, 0], [1, 0], [1, 1]],
-    5: [[0, 0], [1, 1]],
-    6: [[0, 0], [0, 1], [1, 0]],
-    7: [[0, 0], [0, 1], [1, 0], [1, 1]],
-    8: [[0, 0], [0, 1], [1, 1]],
-    9: [[0, 1], [1, 0]],
-    0: [[0, 1], [1, 0], [1, 1]],
-  };
-  const glyphs = {};
-  for (const d of Object.keys(DOTS)) {
-    const g = [[false, false], [false, false], [false, false]];
-    for (const [x, y] of DOTS[d]) g[y][x] = true;
-    glyphs[d] = [0, 1].map((x) => (g[0][x] ? 1 : 0) | (g[1][x] ? 2 : 0) | (g[2][x] ? 4 : 0));
-  }
-  glyphs[':'] = [0b101];
-  return { name, rows: 3, scale, glyphs };
-}
+const PIXEL_3X5 = {
+  0: ['###', '#.#', '#.#', '#.#', '###'], 1: ['.#.', '##.', '.#.', '.#.', '###'],
+  2: ['###', '..#', '###', '#..', '###'], 3: ['###', '..#', '.##', '..#', '###'],
+  4: ['#.#', '#.#', '###', '..#', '..#'], 5: ['###', '#..', '###', '..#', '###'],
+  6: ['###', '#..', '###', '#.#', '###'], 7: ['###', '..#', '.#.', '.#.', '.#.'],
+  8: ['###', '#.#', '###', '#.#', '###'], 9: ['###', '#.#', '###', '..#', '###'],
+  ':': ['.', '#', '.', '#', '.'],
+};
+
+const ROUNDED_4X7 = {
+  0: ['.##.', '#..#', '#..#', '#..#', '#..#', '#..#', '.##.'],
+  1: ['..#.', '.##.', '..#.', '..#.', '..#.', '..#.', '.###'],
+  2: ['.##.', '#..#', '...#', '..#.', '.#..', '#...', '####'],
+  3: ['.##.', '#..#', '...#', '..#.', '...#', '#..#', '.##.'],
+  4: ['...#', '..##', '.#.#', '#..#', '####', '...#', '...#'],
+  5: ['####', '#...', '###.', '...#', '...#', '#..#', '.##.'],
+  6: ['.##.', '#...', '#...', '###.', '#..#', '#..#', '.##.'],
+  7: ['####', '...#', '..#.', '..#.', '.#..', '.#..', '.#..'],
+  8: ['.##.', '#..#', '#..#', '.##.', '#..#', '#..#', '.##.'],
+  9: ['.##.', '#..#', '#..#', '.###', '...#', '...#', '.##.'],
+  ':': ['.', '.', '#', '.', '#', '.', '.'],
+};
 
 // prettier-ignore
 const CLOCK_FONTS = [
@@ -133,6 +135,6 @@ const CLOCK_FONTS = [
   buildDotMatrixFont('Dot matrix classico', 2),
   buildBoldFont('Dot matrix grassetto', 2),
   buildDicePipsFont('Dadi', 3),
-  buildBarCodeFont('Codice a barre', 2),
-  buildBrailleFont('Braille', 3),
+  buildRowFont('Pixel 3x5', 3, PIXEL_3X5),
+  buildRowFont('Arrotondato', 2, ROUNDED_4X7),
 ];
