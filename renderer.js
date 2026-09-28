@@ -32,6 +32,12 @@ function drawLed(x, y, color) {
   ctx.fill();
 }
 
+// Pixel pieno (quadrato, senza spazi), per scene tipo la scheda "auto": nessun nero di fondo.
+function drawBlock(x, y, color) {
+  ctx.fillStyle = color;
+  ctx.fillRect(x * PITCH, y * PITCH, PITCH, PITCH);
+}
+
 // Disegna 64 colonne di testo partendo da `start` (può essere negativo).
 function drawColumns(columns, start, color) {
   for (let x = 0; x < COLS; x++) {
@@ -70,39 +76,59 @@ const clock = {
   },
 };
 
-// Sagoma auto vista di lato, ispirata a un'auto pixel art con tettuccio, vetri, luci e ruote.
-// Ogni riga: elenco di [colonna inizio, colonna fine, colore]. Colonne locali 0-33.
+// Sagoma auto vista di lato, ASIMMETRICA: muso basso e paraurti a sinistra (fronte),
+// cofano, abitacolo e alettone a destra (retro). Disegnata a pixel pieni (drawBlock),
+// non a pallini, su uno sfondo che riempie tutta la griglia (niente nero).
+// Ogni riga: elenco di [colonna inizio, colonna fine, colore]. Colonne locali 0-39.
 const CAR_COLORS = {
-  roof: '#e0391c',   // bordo rosso del tettuccio
-  body: '#ff8c3c',   // carrozzeria arancione
-  glass: '#8fe3f0',  // vetro
-  pillar: '#2a2a2a', // montante tra i vetri
-  light: '#ffd23c',  // luci gialle
-  trim: '#c23016',   // filo rosso sotto la carrozzeria
-  wheel: '#333333',  // ruota
-  hub: '#9a9a9a',    // mozzo
+  body: '#d81e2c',    // carrozzeria rossa
+  bodyDark: '#a3121e',// ombra sotto la carrozzeria
+  stripe: '#f2f2f2',  // fascia chiara decorativa
+  glass: '#a7e6f5',   // vetro
+  pillar: '#1a1a1a',  // montante tra i vetri
+  bumper: '#2a2a2a',  // paraurti
+  light: '#ffe066',   // fari
+  wheel: '#161616',   // ruota
+  hub: '#c9c9c9',     // mozzo
 };
 const CAR_SHAPE = [
-  [[13, 20, 'roof']],
-  [[11, 12, 'roof'], [13, 20, 'glass'], [21, 22, 'roof']],
-  [[9, 10, 'roof'], [11, 15, 'glass'], [16, 17, 'pillar'], [18, 23, 'glass'], [24, 25, 'roof']],
-  [[6, 27, 'body']],
-  [[3, 30, 'body']],
-  [[0, 1, 'light'], [2, 31, 'body'], [32, 33, 'light']],
-  [[0, 33, 'trim']],
-  [[4, 10, 'wheel'], [23, 29, 'wheel']],
-  [[4, 5, 'wheel'], [6, 8, 'hub'], [9, 10, 'wheel'], [23, 24, 'wheel'], [25, 27, 'hub'], [28, 29, 'wheel']],
+  [[16, 27, 'body'], [33, 35, 'bumper']],                                    // tettuccio + alettone
+  [[14, 15, 'body'], [16, 20, 'glass'], [21, 22, 'pillar'], [23, 26, 'glass'], [27, 28, 'body'], [31, 36, 'body']],
+  [[6, 31, 'body'], [32, 37, 'body']],                                       // cofano + baule
+  [[2, 37, 'body'], [38, 39, 'bumper']],                                     // il muso sale
+  [[0, 1, 'light'], [2, 39, 'body']],                                        // faro anteriore, muso pieno
+  [[0, 39, 'body']],                                                         // fiancata (skirt)
+  [[6, 13, 'wheel'], [26, 33, 'wheel']],                                     // passaruota: le ruote spuntano qui
+  [[6, 7, 'wheel'], [8, 11, 'hub'], [12, 13, 'wheel'],
+   [26, 27, 'wheel'], [28, 31, 'hub'], [32, 33, 'wheel']],                   // ruote con mozzo
+  [[6, 13, 'wheel'], [26, 33, 'wheel']],                                     // ruote (sotto)
 ];
-const CAR_W = 34, CAR_H = CAR_SHAPE.length;
+const CAR_W = 40, CAR_H = CAR_SHAPE.length;
 const CAR_X = Math.floor((COLS - CAR_W) / 2);
-const CAR_Y = Math.floor((ROWS - CAR_H) / 2);
+const CAR_Y = 2;
 
-// Sfondo statico dietro l'auto: linea d'orizzonte + un paio di nuvole.
+// Scena di sfondo che riempie OGNI pixel della griglia: cielo a bande, sole, nuvole, prato e strada.
+const SKY_BANDS = ['#1f6fb2', '#3f93d6', '#7fc4ef', '#bfe6fb'];
 function drawCarBackground() {
-  for (let x = 0; x < COLS; x++) drawLed(x, CAR_Y + CAR_H + 1, '#333');
-  const cloud = (x, y) => { drawLed(x, y, '#2b2b2b'); drawLed(x + 1, y, '#2b2b2b'); drawLed(x + 1, y - 1, '#2b2b2b'); };
-  cloud(4, 2);
-  cloud(54, 3);
+  for (let y = 0; y < ROWS; y++) {
+    let color;
+    if (y < 8) color = SKY_BANDS[Math.floor(y / 2)];
+    else if (y < 10) color = '#4f8f3a'; // prato
+    else color = '#3a3a3a';             // strada
+    for (let x = 0; x < COLS; x++) drawBlock(x, y, color);
+  }
+  // strisce della strada
+  for (let x = 0; x < COLS; x += 6) {
+    drawBlock(x, 12, '#e8c94a');
+    drawBlock(x + 1, 12, '#e8c94a');
+  }
+  // sole
+  const sun = (x, y) => drawBlock(x, y, '#ffe066');
+  sun(3, 1); sun(4, 1); sun(3, 2); sun(4, 2);
+  // nuvole
+  const cloud = (x, y) => { drawBlock(x, y, '#ffffff'); drawBlock(x + 1, y, '#ffffff'); drawBlock(x + 1, y - 1, '#ffffff'); drawBlock(x + 2, y, '#ffffff'); };
+  cloud(46, 2);
+  cloud(56, 4);
 }
 
 const car = {
@@ -121,14 +147,14 @@ const car = {
       const y = CAR_Y + row + bounce;
       if (y < 0 || y >= ROWS) continue;
       for (const [c0, c1, key] of CAR_SHAPE[row]) {
-        for (let col = c0; col <= c1; col++) drawLed(CAR_X + col, y, CAR_COLORS[key]);
+        for (let col = c0; col <= c1; col++) drawBlock(CAR_X + col, y, CAR_COLORS[key]);
       }
     }
     if (grounded) {
       const dustY = CAR_Y + CAR_H;
       if (dustY < ROWS) {
-        drawLed(CAR_X + 7, dustY, '#555');
-        drawLed(CAR_X + 26, dustY, '#555');
+        drawBlock(CAR_X + 9, dustY, '#8a8a8a');
+        drawBlock(CAR_X + 29, dustY, '#8a8a8a');
       }
     }
   },
