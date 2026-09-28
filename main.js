@@ -6,7 +6,7 @@ const path = require('path');
 // Nell'exe portatile config.json sta accanto all'exe; in sviluppo nella cartella del progetto.
 const CONFIG_DIR = process.env.PORTABLE_EXECUTABLE_DIR || (app.isPackaged ? path.dirname(process.execPath) : __dirname);
 const CONFIG_PATH = path.join(CONFIG_DIR, 'config.json');
-const DEFAULT_CONFIG = { text: 'Ciao! Questo e\' PixelClock', color: '#ff5a36', speed: 20 };
+const DEFAULT_CONFIG = { text: 'Ciao! Questo e\' PixelClock', color: '#ff5a36', clockColor: '#ffffff', speed: 20 };
 const SNAPSHOT = process.argv.includes('--snapshot');
 
 if (!fs.existsSync(CONFIG_PATH)) {
@@ -17,14 +17,14 @@ function readConfig() {
   try {
     return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
   } catch (err) {
-    return { text: 'config.json non valido', color: '#ff5a36', speed: 20 };
+    return { text: 'config.json non valido', color: '#ff5a36', clockColor: '#ffffff', speed: 20 };
   }
 }
 
 function createWindow() {
   const win = new BrowserWindow({
     width: 560,
-    height: 168,
+    height: 182,
     frame: false,
     transparent: true,
     resizable: false,
@@ -45,6 +45,10 @@ function createWindow() {
       setTimeout(async () => {
         const img = await win.webContents.capturePage();
         fs.writeFileSync(path.join(__dirname, 'snapshot.png'), img.toPNG());
+        await win.webContents.executeJavaScript("document.getElementById('next').click()");
+        await new Promise((r) => setTimeout(r, 300));
+        const img2 = await win.webContents.capturePage();
+        fs.writeFileSync(path.join(__dirname, 'snapshot2.png'), img2.toPNG());
         app.quit();
       }, 1500);
     });

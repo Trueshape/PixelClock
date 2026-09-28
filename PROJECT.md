@@ -38,7 +38,10 @@
 - [ ] Schermata immagini (cartella → pixel art)
 - [ ] Timer Pomodoro "BUSY" con conto alla rovescia
 - [ ] Testo che scorre (frase personalizzata)
-- [ ] Rotazione automatica + clic per passare avanti
+- [x] Pulsante rosso per passare al modulo successivo
+- [x] Modulo orologio HH:MM
+- [x] Testo che scorre
+- [ ] Rotazione automatica
 
 **Dopo (non ora):**
 - Meteo, contatore follower

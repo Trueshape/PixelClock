@@ -8,15 +8,24 @@
   <style>
     html, body { margin: 0; height: 100%; background: transparent; overflow: hidden; }
     .bezel {
-      position: absolute; inset: 8px;
+      position: absolute; inset: 22px 8px 8px 8px;
       background: #eceae4; border-radius: 14px;
       box-shadow: 0 4px 14px rgba(0,0,0,.35);
       -webkit-app-region: drag;
       display: flex; align-items: center; justify-content: center;
     }
     canvas { background: #050505; border-radius: 6px; }
+    /* Pulsante rosso "fisico" sopra la cornice, come la manopola della Pixbar */
+    #next {
+      position: absolute; top: 8px; left: 40px; width: 34px; height: 18px;
+      border: 0; border-radius: 6px 6px 2px 2px; padding: 0; cursor: pointer;
+      background: linear-gradient(#ff6a4a, #e0391c);
+      box-shadow: inset 0 -3px 0 rgba(0,0,0,.2);
+      -webkit-app-region: no-drag;
+    }
+    #next:active { transform: translateY(2px); box-shadow: none; }
     .btns {
-      position: absolute; top: 12px; right: 14px; display: flex; gap: 6px;
+      position: absolute; top: 26px; right: 14px; display: flex; gap: 6px;
       opacity: 0; transition: opacity .2s; -webkit-app-region: no-drag;
     }
     body:hover .btns { opacity: 1; }
@@ -28,6 +37,7 @@
 </head>
 <body>
   <div class="bezel"><canvas id="led"></canvas></div>
+  <button id="next" title="Modulo successivo"></button>
   <div class="btns">
     <button id="settings" title="Modifica testo (config.json)">⚙</button>
     <button id="close" title="Chiudi">×</button>
