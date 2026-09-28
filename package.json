@@ -29,7 +29,7 @@
       "artifactName": "PixelClock.exe"
     },
     "directories": {
-      "output": "dist"
+      "output": "release"
     }
   }
 }
