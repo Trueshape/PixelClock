@@ -20,7 +20,8 @@
       "preload.js",
       "index.html",
       "renderer.js",
-      "font.js"
+      "font.js",
+      "fonts/**/*"
     ],
     "win": {
       "target": "portable"

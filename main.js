@@ -44,22 +44,22 @@ function createWindow() {
     win.webContents.once('did-finish-load', () => {
       setTimeout(async () => {
         const img = await win.webContents.capturePage();
-        fs.writeFileSync(path.join(__dirname, 'snapshot.png'), img.toPNG());
+        fs.writeFileSync(path.join(CONFIG_DIR, 'snapshot.png'), img.toPNG());
         await win.webContents.executeJavaScript("document.getElementById('next').click()");
         await new Promise((r) => setTimeout(r, 300));
         const img2 = await win.webContents.capturePage();
-        fs.writeFileSync(path.join(__dirname, 'snapshot2.png'), img2.toPNG());
+        fs.writeFileSync(path.join(CONFIG_DIR, 'snapshot2.png'), img2.toPNG());
         await win.webContents.executeJavaScript("document.getElementById('next').click()");
         await new Promise((r) => setTimeout(r, 250));
         const img3a = await win.webContents.capturePage();
-        fs.writeFileSync(path.join(__dirname, 'snapshot3a.png'), img3a.toPNG());
+        fs.writeFileSync(path.join(CONFIG_DIR, 'snapshot3a.png'), img3a.toPNG());
         // torna all'orologio (auto -> testo -> orologio) e cicla i 10 font uno a uno
         await win.webContents.executeJavaScript("document.getElementById('next').click()");
         await win.webContents.executeJavaScript("document.getElementById('next').click()");
         for (let i = 0; i < 10; i++) {
           await new Promise((r) => setTimeout(r, 150));
           const imgF = await win.webContents.capturePage();
-          fs.writeFileSync(path.join(__dirname, `snapshot_font${i}.png`), imgF.toPNG());
+          fs.writeFileSync(path.join(CONFIG_DIR, `snapshot_font${i}.png`), imgF.toPNG());
           await win.webContents.executeJavaScript("document.getElementById('variant').click()");
         }
         app.quit();

@@ -50,6 +50,16 @@ function buildDotMatrixFont(name, scale) {
   return { name, rows: 7, scale, glyphs };
 }
 
+// Grassetto: stesso disegno del dot matrix, ma ogni tratto è ispessito di una colonna.
+function buildBoldFont(name, scale) {
+  const base = buildDotMatrixFont(name, scale);
+  for (const ch of Object.keys(base.glyphs)) {
+    const c = base.glyphs[ch];
+    base.glyphs[ch] = [...c, 0].map((bits, i) => bits | (c[i - 1] || 0));
+  }
+  return base;
+}
+
 // --- Font "dadi": ogni cifra come i pallini di un dado/domino, griglia 3x3 ----------
 function buildDicePipsFont(name, scale) {
   const PIPS = {
@@ -114,14 +124,15 @@ function buildBrailleFont(name, scale) {
 
 // prettier-ignore
 const CLOCK_FONTS = [
+  // Vincolo: rows*scale <= 16 e 4 cifre + ':' larghe al massimo 64 LED.
   buildSevenSegFont('7 segmenti mini', 3, 5, 2),
   buildSevenSegFont('7 segmenti piccolo', 5, 7, 2),
-  buildSevenSegFont('7 segmenti medio', 7, 9, 2),
-  buildSevenSegFont('7 segmenti alto', 7, 11, 2),
-  buildSevenSegFont('7 segmenti largo', 9, 7, 2),
+  buildSevenSegFont('7 segmenti medio', 7, 13, 1),
+  buildSevenSegFont('7 segmenti alto', 9, 15, 1),
+  buildSevenSegFont('7 segmenti largo', 12, 9, 1),
   buildDotMatrixFont('Dot matrix classico', 2),
-  buildDotMatrixFont('Dot matrix grassetto', 3),
+  buildBoldFont('Dot matrix grassetto', 2),
   buildDicePipsFont('Dadi', 3),
-  buildBarCodeFont('Codice a barre', 3),
+  buildBarCodeFont('Codice a barre', 2),
   buildBrailleFont('Braille', 3),
 ];

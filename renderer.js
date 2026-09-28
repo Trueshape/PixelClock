@@ -222,7 +222,11 @@ function frame(now) {
   const dt = (now - last) / 1000;
   last = now;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  modules[current].draw(dt);
+  try {
+    modules[current].draw(dt);
+  } catch (err) {
+    console.error('Errore nel modulo', current, err); // non blocca il loop: si vede nero ma i bottoni restano vivi
+  }
   requestAnimationFrame(frame);
 }
 
