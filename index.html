@@ -1,0 +1,38 @@
+<!-- index.html — Finestra del display: cornice, canvas LED 64x16, pulsanti impostazioni/chiudi. -->
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'">
+  <title>PixelClock</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: transparent; overflow: hidden; }
+    .bezel {
+      position: absolute; inset: 8px;
+      background: #eceae4; border-radius: 14px;
+      box-shadow: 0 4px 14px rgba(0,0,0,.35);
+      -webkit-app-region: drag;
+      display: flex; align-items: center; justify-content: center;
+    }
+    canvas { background: #050505; border-radius: 6px; }
+    .btns {
+      position: absolute; top: 12px; right: 14px; display: flex; gap: 6px;
+      opacity: 0; transition: opacity .2s; -webkit-app-region: no-drag;
+    }
+    body:hover .btns { opacity: 1; }
+    .btns button {
+      width: 18px; height: 18px; border: 0; border-radius: 50%;
+      background: #ff5a36; color: #fff; font: bold 11px sans-serif; cursor: pointer; padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="bezel"><canvas id="led"></canvas></div>
+  <div class="btns">
+    <button id="settings" title="Modifica testo (config.json)">⚙</button>
+    <button id="close" title="Chiudi">×</button>
+  </div>
+  <script src="font.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>

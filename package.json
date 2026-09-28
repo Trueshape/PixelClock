@@ -1,0 +1,13 @@
+{
+  "name": "pixelclock",
+  "version": "0.1.0",
+  "description": "Display LED 64x16 in pixel art, sempre sopra, con testo che scorre",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "snapshot": "electron . --snapshot"
+  },
+  "devDependencies": {
+    "electron": "^44.4.5"
+  }
+}
