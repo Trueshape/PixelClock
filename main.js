@@ -49,6 +49,13 @@ function createWindow() {
         await new Promise((r) => setTimeout(r, 300));
         const img2 = await win.webContents.capturePage();
         fs.writeFileSync(path.join(__dirname, 'snapshot2.png'), img2.toPNG());
+        await win.webContents.executeJavaScript("document.getElementById('next').click()");
+        await new Promise((r) => setTimeout(r, 250));
+        const img3a = await win.webContents.capturePage();
+        fs.writeFileSync(path.join(__dirname, 'snapshot3a.png'), img3a.toPNG());
+        await new Promise((r) => setTimeout(r, 250));
+        const img3b = await win.webContents.capturePage();
+        fs.writeFileSync(path.join(__dirname, 'snapshot3b.png'), img3b.toPNG());
         app.quit();
       }, 1500);
     });

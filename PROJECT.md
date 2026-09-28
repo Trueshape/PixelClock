@@ -36,6 +36,7 @@
 - [ ] Finestra Electron sempre sopra, trascinabile, griglia LED
 - [ ] Schermata ora (font pixel)
 - [ ] Schermata immagini (cartella → pixel art)
+- [x] Modulo auto animata (rimbalzo sul posto)
 - [ ] Timer Pomodoro "BUSY" con conto alla rovescia
 - [ ] Testo che scorre (frase personalizzata)
 - [x] Pulsante rosso per passare al modulo successivo
