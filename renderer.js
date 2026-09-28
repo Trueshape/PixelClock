@@ -70,21 +70,40 @@ const clock = {
   },
 };
 
-// Sagoma auto vista di lato: righe dall'alto in basso, ogni riga = elenco di [colonna inizio, colonna fine].
+// Sagoma auto vista di lato, ispirata a un'auto pixel art con tettuccio, vetri, luci e ruote.
+// Ogni riga: elenco di [colonna inizio, colonna fine, colore]. Colonne locali 0-33.
+const CAR_COLORS = {
+  roof: '#e0391c',   // bordo rosso del tettuccio
+  body: '#ff8c3c',   // carrozzeria arancione
+  glass: '#8fe3f0',  // vetro
+  pillar: '#2a2a2a', // montante tra i vetri
+  light: '#ffd23c',  // luci gialle
+  trim: '#c23016',   // filo rosso sotto la carrozzeria
+  wheel: '#333333',  // ruota
+  hub: '#9a9a9a',    // mozzo
+};
 const CAR_SHAPE = [
-  [[10, 17]],           // tettuccio
-  [[7, 20]],
-  [[4, 23]],
-  [[1, 26]],
-  [[0, 27]],             // corpo
-  [[0, 27]],
-  [[0, 5], [22, 27]],    // passaruota
-  [[2, 7], [20, 25]],    // ruote (sopra)
-  [[2, 7], [20, 25]],    // ruote (sotto)
+  [[13, 20, 'roof']],
+  [[11, 12, 'roof'], [13, 20, 'glass'], [21, 22, 'roof']],
+  [[9, 10, 'roof'], [11, 15, 'glass'], [16, 17, 'pillar'], [18, 23, 'glass'], [24, 25, 'roof']],
+  [[6, 27, 'body']],
+  [[3, 30, 'body']],
+  [[0, 1, 'light'], [2, 31, 'body'], [32, 33, 'light']],
+  [[0, 33, 'trim']],
+  [[4, 10, 'wheel'], [23, 29, 'wheel']],
+  [[4, 5, 'wheel'], [6, 8, 'hub'], [9, 10, 'wheel'], [23, 24, 'wheel'], [25, 27, 'hub'], [28, 29, 'wheel']],
 ];
-const CAR_W = 28, CAR_H = CAR_SHAPE.length;
+const CAR_W = 34, CAR_H = CAR_SHAPE.length;
 const CAR_X = Math.floor((COLS - CAR_W) / 2);
 const CAR_Y = Math.floor((ROWS - CAR_H) / 2);
+
+// Sfondo statico dietro l'auto: linea d'orizzonte + un paio di nuvole.
+function drawCarBackground() {
+  for (let x = 0; x < COLS; x++) drawLed(x, CAR_Y + CAR_H + 1, '#333');
+  const cloud = (x, y) => { drawLed(x, y, '#2b2b2b'); drawLed(x + 1, y, '#2b2b2b'); drawLed(x + 1, y - 1, '#2b2b2b'); };
+  cloud(4, 2);
+  cloud(54, 3);
+}
 
 const car = {
   phase: 0,
@@ -93,21 +112,23 @@ const car = {
     this.phase += dt;
     const period = 0.5; // secondi per un rimbalzo completo, sul posto
     const t = (this.phase % period) / period;
-    const bounce = Math.round(Math.sin(t * Math.PI * 2) * 1.4); // -1, 0, 1: su e giù come un cartone
-    const grounded = Math.sin(t * Math.PI * 2) < -0.3;          // ruote a terra: mostra la polvere
+    const wave = Math.sin(t * Math.PI * 2);
+    const bounce = Math.round(wave * 1.4); // -1, 0, 1: su e giù come un cartone
+    const grounded = wave < -0.3;          // ruote a terra: mostra la polvere
 
+    drawCarBackground();
     for (let row = 0; row < CAR_H; row++) {
       const y = CAR_Y + row + bounce;
       if (y < 0 || y >= ROWS) continue;
-      for (const [c0, c1] of CAR_SHAPE[row]) {
-        for (let col = c0; col <= c1; col++) drawLed(CAR_X + col, y, cfg.color);
+      for (const [c0, c1, key] of CAR_SHAPE[row]) {
+        for (let col = c0; col <= c1; col++) drawLed(CAR_X + col, y, CAR_COLORS[key]);
       }
     }
     if (grounded) {
       const dustY = CAR_Y + CAR_H;
       if (dustY < ROWS) {
-        drawLed(CAR_X + 3, dustY, '#555');
-        drawLed(CAR_X + 24, dustY, '#555');
+        drawLed(CAR_X + 7, dustY, '#555');
+        drawLed(CAR_X + 26, dustY, '#555');
       }
     }
   },

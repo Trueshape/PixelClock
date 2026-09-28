@@ -4,3 +4,4 @@
 2026-09-28 — Impostazioni via config.json osservato — niente UI da costruire per la v1
 2026-09-28 — Exe portatile (electron-builder), config.json accanto all'exe — l'utente vuole programmi self-contained
 2026-09-28 — Modulo auto in pixel art, rimbalzo verticale discreto (no sine continuo) — piu' 'da cartone animato'
+2026-09-28 — Auto ridisegnata a colori (rosso/arancio/azzurro/giallo) su riferimento utente, sfondo con orizzonte e nuvole
