@@ -55,5 +55,5 @@
 
 ## Stato
 
-- **Passo attuale:** 4 (Stile) — da confermare
-- **Prossima azione:** confermare dimensione griglia e colori
+- **Passo attuale:** v0.1 fatta — testo che scorre funzionante (commit 943ac09)
+- **Prossima azione:** provare `npm start` e decidere la prossima schermata (ora, immagini o Pomodoro)

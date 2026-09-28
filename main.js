@@ -3,8 +3,15 @@ const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const fs = require('fs');
 const path = require('path');
 
-const CONFIG_PATH = path.join(__dirname, 'config.json');
+// Nell'exe portatile config.json sta accanto all'exe; in sviluppo nella cartella del progetto.
+const CONFIG_DIR = process.env.PORTABLE_EXECUTABLE_DIR || (app.isPackaged ? path.dirname(process.execPath) : __dirname);
+const CONFIG_PATH = path.join(CONFIG_DIR, 'config.json');
+const DEFAULT_CONFIG = { text: 'Ciao! Questo e\' PixelClock', color: '#ff5a36', speed: 20 };
 const SNAPSHOT = process.argv.includes('--snapshot');
+
+if (!fs.existsSync(CONFIG_PATH)) {
+  fs.writeFileSync(CONFIG_PATH, JSON.stringify(DEFAULT_CONFIG, null, 2));
+}
 
 function readConfig() {
   try {
