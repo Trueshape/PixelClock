@@ -53,9 +53,15 @@ function createWindow() {
         await new Promise((r) => setTimeout(r, 250));
         const img3a = await win.webContents.capturePage();
         fs.writeFileSync(path.join(__dirname, 'snapshot3a.png'), img3a.toPNG());
-        await new Promise((r) => setTimeout(r, 250));
-        const img3b = await win.webContents.capturePage();
-        fs.writeFileSync(path.join(__dirname, 'snapshot3b.png'), img3b.toPNG());
+        // torna all'orologio (auto -> testo -> orologio) e cicla i 10 font uno a uno
+        await win.webContents.executeJavaScript("document.getElementById('next').click()");
+        await win.webContents.executeJavaScript("document.getElementById('next').click()");
+        for (let i = 0; i < 10; i++) {
+          await new Promise((r) => setTimeout(r, 150));
+          const imgF = await win.webContents.capturePage();
+          fs.writeFileSync(path.join(__dirname, `snapshot_font${i}.png`), imgF.toPNG());
+          await win.webContents.executeJavaScript("document.getElementById('variant').click()");
+        }
         app.quit();
       }, 1500);
     });

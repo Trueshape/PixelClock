@@ -52,27 +52,61 @@ function drawColumns(columns, start, color) {
 
 // --- Moduli: ognuno ha enter() quando diventa attivo e draw(dt) a ogni frame ---
 
+const TEXT_PALETTE = ['#ff5a36', '#3ba7ff', '#7cff6b', '#ffe066', '#ff6bd6', '#ffffff'];
 const scrollText = {
-  columns: [], offset: 0,
+  columns: [], offset: 0, colorIndex: -1, // -1 = usa cfg.color
   enter() { this.columns = buildColumns(cfg.text || ' '); this.offset = 0; },
+  variant() { this.colorIndex = (this.colorIndex + 1) % TEXT_PALETTE.length; },
   draw(dt) {
     this.offset += cfg.speed * dt;
     if (this.offset > this.columns.length) this.offset = -COLS;
-    drawColumns(this.columns, Math.floor(this.offset), cfg.color);
+    const color = this.colorIndex === -1 ? cfg.color : TEXT_PALETTE[this.colorIndex];
+    drawColumns(this.columns, Math.floor(this.offset), color);
   },
 };
 
+// Costruisce le colonne per un font dell'orologio (variabile per altezza/larghezza/scala)
+// a partire da CLOCK_FONTS. Restituisce anche l'intervallo di colonne dei due punti,
+// utile per farli lampeggiare senza doverlo ricalcolare al volo.
+function buildFontColumns(font, text) {
+  const out = [];
+  let colonRange = null;
+  for (const ch of text) {
+    const glyph = font.glyphs[ch] || font.glyphs['0'];
+    if (ch === ':') colonRange = [out.length, out.length + glyph.length * font.scale];
+    for (const col of glyph) for (let s = 0; s < font.scale; s++) out.push(col);
+    for (let s = 0; s < font.scale; s++) out.push(0); // spazio tra caratteri
+  }
+  return { columns: out, colonRange };
+}
+
+function drawFontColumns(font, columns, start, color) {
+  const h = font.rows * font.scale;
+  const yOffset = Math.floor((ROWS - h) / 2);
+  for (let x = 0; x < COLS; x++) {
+    const bits = columns[start + x] || 0;
+    for (let y = 0; y < ROWS; y++) {
+      const fy = Math.floor((y - yOffset) / font.scale);
+      const on = y >= yOffset && fy >= 0 && fy < font.rows && (bits >> fy) & 1;
+      drawLed(x, y, on ? color : null);
+    }
+  }
+}
+
 const clock = {
+  fontIndex: 0,
   enter() {},
+  variant() { this.fontIndex = (this.fontIndex + 1) % CLOCK_FONTS.length; },
   draw() {
+    const font = CLOCK_FONTS[this.fontIndex];
     const now = new Date();
     const hh = String(now.getHours()).padStart(2, '0');
     const mm = String(now.getMinutes()).padStart(2, '0');
-    const sep = now.getMilliseconds() < 500 ? ':' : ' '; // due punti lampeggianti
-    const cols = buildColumns(hh + ':' + mm);
-    if (sep === ' ') for (let i = 24; i < 28; i++) cols[i] = 0; // spegne i due punti
-    const width = cols.length - SCALE; // senza lo spazio finale
-    drawColumns(cols, -Math.floor((COLS - width) / 2), cfg.clockColor);
+    const blinkOff = now.getMilliseconds() >= 500; // due punti lampeggianti
+    const { columns, colonRange } = buildFontColumns(font, hh + ':' + mm);
+    if (blinkOff && colonRange) for (let i = colonRange[0]; i < colonRange[1]; i++) columns[i] = 0;
+    const width = columns.length - font.scale; // senza lo spazio finale
+    drawFontColumns(font, columns, -Math.floor((COLS - width) / 2), cfg.clockColor);
   },
 };
 
@@ -107,33 +141,42 @@ const CAR_W = 40, CAR_H = CAR_SHAPE.length;
 const CAR_X = Math.floor((COLS - CAR_W) / 2);
 const CAR_Y = 2;
 
-// Scena di sfondo che riempie OGNI pixel della griglia: cielo a bande, sole, nuvole, prato e strada.
-const SKY_BANDS = ['#1f6fb2', '#3f93d6', '#7fc4ef', '#bfe6fb'];
-function drawCarBackground() {
+// Scena di sfondo che riempie OGNI pixel della griglia: cielo a bande, sole/luna, nuvole/stelle,
+// prato e strada. Tre temi, ciclabili col pulsante blu.
+const CAR_THEMES = [
+  { name: 'Giorno', sky: ['#1f6fb2', '#3f93d6', '#7fc4ef', '#bfe6fb'], grass: '#4f8f3a', road: '#3a3a3a',
+    lane: '#e8c94a', glow: '#ffe066', deco: '#ffffff', body: '#d81e2c' },
+  { name: 'Tramonto', sky: ['#7a2a5c', '#c04a4a', '#e8823f', '#f6c15a'], grass: '#3c6e2a', road: '#2e2a33',
+    lane: '#ffd27a', glow: '#ffcf4d', deco: '#ffb27a', body: '#e0391c' },
+  { name: 'Notte', sky: ['#050818', '#0d1230', '#151c40', '#1f2a55'], grass: '#16321c', road: '#161616',
+    lane: '#8a8a55', glow: '#dfe6ff', deco: '#ffffff', body: '#3ba7ff' },
+];
+
+function drawCarBackground(theme) {
   for (let y = 0; y < ROWS; y++) {
     let color;
-    if (y < 8) color = SKY_BANDS[Math.floor(y / 2)];
-    else if (y < 10) color = '#4f8f3a'; // prato
-    else color = '#3a3a3a';             // strada
+    if (y < 8) color = theme.sky[Math.floor(y / 2)];
+    else if (y < 10) color = theme.grass;
+    else color = theme.road;
     for (let x = 0; x < COLS; x++) drawBlock(x, y, color);
   }
-  // strisce della strada
   for (let x = 0; x < COLS; x += 6) {
-    drawBlock(x, 12, '#e8c94a');
-    drawBlock(x + 1, 12, '#e8c94a');
+    drawBlock(x, 12, theme.lane);
+    drawBlock(x + 1, 12, theme.lane);
   }
-  // sole
-  const sun = (x, y) => drawBlock(x, y, '#ffe066');
-  sun(3, 1); sun(4, 1); sun(3, 2); sun(4, 2);
-  // nuvole
-  const cloud = (x, y) => { drawBlock(x, y, '#ffffff'); drawBlock(x + 1, y, '#ffffff'); drawBlock(x + 1, y - 1, '#ffffff'); drawBlock(x + 2, y, '#ffffff'); };
+  // sole/luna
+  const glow = (x, y) => drawBlock(x, y, theme.glow);
+  glow(3, 1); glow(4, 1); glow(3, 2); glow(4, 2);
+  // nuvole/stelle
+  const cloud = (x, y) => { drawBlock(x, y, theme.deco); drawBlock(x + 1, y, theme.deco); drawBlock(x + 1, y - 1, theme.deco); drawBlock(x + 2, y, theme.deco); };
   cloud(46, 2);
   cloud(56, 4);
 }
 
 const car = {
-  phase: 0,
+  phase: 0, themeIndex: 0,
   enter() { this.phase = 0; },
+  variant() { this.themeIndex = (this.themeIndex + 1) % CAR_THEMES.length; },
   draw(dt) {
     this.phase += dt;
     const period = 0.5; // secondi per un rimbalzo completo, sul posto
@@ -141,13 +184,15 @@ const car = {
     const wave = Math.sin(t * Math.PI * 2);
     const bounce = Math.round(wave * 1.4); // -1, 0, 1: su e giù come un cartone
     const grounded = wave < -0.3;          // ruote a terra: mostra la polvere
+    const theme = CAR_THEMES[this.themeIndex];
+    const colors = { ...CAR_COLORS, body: theme.body };
 
-    drawCarBackground();
+    drawCarBackground(theme);
     for (let row = 0; row < CAR_H; row++) {
       const y = CAR_Y + row + bounce;
       if (y < 0 || y >= ROWS) continue;
       for (const [c0, c1, key] of CAR_SHAPE[row]) {
-        for (let col = c0; col <= c1; col++) drawBlock(CAR_X + col, y, CAR_COLORS[key]);
+        for (let col = c0; col <= c1; col++) drawBlock(CAR_X + col, y, colors[key]);
       }
     }
     if (grounded) {
@@ -168,6 +213,11 @@ function nextModule() {
   modules[current].enter();
 }
 
+function variantModule() {
+  const m = modules[current];
+  if (m.variant) m.variant();
+}
+
 function frame(now) {
   const dt = (now - last) / 1000;
   last = now;
@@ -182,6 +232,7 @@ function applyConfig(next) {
 }
 
 document.getElementById('next').onclick = nextModule;
+document.getElementById('variant').onclick = variantModule;
 document.getElementById('settings').onclick = () => window.pixel.openConfig();
 document.getElementById('close').onclick = () => window.pixel.quit();
 window.pixel.onConfig(applyConfig);

@@ -43,6 +43,7 @@
 - [x] Modulo orologio HH:MM
 - [x] Testo che scorre
 - [ ] Rotazione automatica
+- [x] Pulsante blu: variante del modulo attivo (font orologio, colore testo, scena auto)
 
 **Dopo (non ora):**
 - Meteo, contatore follower

@@ -24,6 +24,15 @@
       -webkit-app-region: no-drag;
     }
     #next:active { transform: translateY(2px); box-shadow: none; }
+    /* Pulsante blu: cicla una variante del modulo attivo (font, colore, scena) */
+    #variant {
+      position: absolute; top: 8px; left: 80px; width: 34px; height: 18px;
+      border: 0; border-radius: 6px 6px 2px 2px; padding: 0; cursor: pointer;
+      background: linear-gradient(#4aa4ff, #1c6fe0);
+      box-shadow: inset 0 -3px 0 rgba(0,0,0,.2);
+      -webkit-app-region: no-drag;
+    }
+    #variant:active { transform: translateY(2px); box-shadow: none; }
     .btns {
       position: absolute; top: 26px; right: 14px; display: flex; gap: 6px;
       opacity: 0; transition: opacity .2s; -webkit-app-region: no-drag;
@@ -38,11 +47,13 @@
 <body>
   <div class="bezel"><canvas id="led"></canvas></div>
   <button id="next" title="Modulo successivo"></button>
+  <button id="variant" title="Variante (font/colore/scena)"></button>
   <div class="btns">
     <button id="settings" title="Modifica testo (config.json)">⚙</button>
     <button id="close" title="Chiudi">×</button>
   </div>
   <script src="font.js"></script>
+  <script src="fonts/clockFonts.js"></script>
   <script src="renderer.js"></script>
 </body>
 </html>
