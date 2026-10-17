@@ -32,3 +32,20 @@
     close();
   });
 })();
+
+// Pulsante di riserva: visibile in modalità testo scorrevole, apre lo stesso editor.
+(function () {
+  var btn = document.createElement('button');
+  btn.type = 'button';
+  btn.textContent = '✎ Modifica testo';
+  btn.setAttribute('aria-label', 'Modifica testo scorrevole');
+  btn.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:24px;font:14px system-ui,sans-serif;padding:8px 14px;border-radius:8px;border:1px solid #eceae4;background:transparent;color:#eceae4;cursor:pointer;z-index:5';
+  btn.addEventListener('click', function () {
+    if (window.pixelMode && window.pixelMode() !== 0) return;
+    document.getElementById('led').dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+  });
+  document.body.appendChild(btn);
+  setInterval(function () {
+    btn.style.display = (window.pixelMode && window.pixelMode() === 0) ? '' : 'none';
+  }, 300);
+})();
