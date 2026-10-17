@@ -245,3 +245,6 @@ window.pixel.getConfig().then((c) => {
   applyConfig(c);
   requestAnimationFrame(frame);
 });
+
+// Versione web: il doppio clic sul display legge il modulo corrente.
+window.pixelMode = function () { return current; };

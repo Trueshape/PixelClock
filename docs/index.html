@@ -50,6 +50,20 @@
   .stage { position: relative; width: 560px; height: 182px; flex: none; }
   .stage .bezel { position: absolute; inset: 22px 8px 8px 8px; }
 </style>
+<style>
+  /* Modal di modifica testo (doppio clic sul display in modalità scorrimento). */
+  #editor { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: none; align-items: center; justify-content: center; z-index: 10; }
+  #editor.open { display: flex; }
+  #editor form { background: #eceae4; color: #1b1b1b; font: 15px system-ui, sans-serif; border-radius: 12px; padding: 22px; width: min(92vw, 420px); display: grid; gap: 14px; box-shadow: 0 12px 40px rgba(0,0,0,.5); }
+  #editor h2 { margin: 0; font-size: 18px; }
+  #editor label { display: grid; gap: 6px; font-size: 14px; }
+  #editor input[type=text] { font: inherit; padding: 8px 10px; border: 1px solid #b9b5ac; border-radius: 6px; }
+  #editor input[type=color] { width: 64px; height: 34px; border: 0; background: none; padding: 0; }
+  #editor .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  #editor .actions { display: flex; justify-content: flex-end; gap: 10px; }
+  #editor button { font: inherit; padding: 9px 16px; border-radius: 8px; border: 1px solid #1b1b1b; background: #1b1b1b; color: #eceae4; cursor: pointer; }
+  #editor button.ghost { background: transparent; color: #1b1b1b; }
+  #editor button:focus-visible, #editor input:focus-visible { outline: 2px solid #ff5a36; outline-offset: 2px; }</style>
 </head>
 <body>
   <div class="stage"><div class="bezel"><canvas id="led"></canvas></div>
@@ -62,8 +76,62 @@
   <script src="shim.js"></script><script src="font.js"></script>
   <script src="fonts/clockFonts.js"></script>
   <script src="renderer.js"></script>
-</body>
+<div id="editor" role="dialog" aria-modal="true" aria-labelledby="ed-title">
+  <form id="ed-form">
+    <h2 id="ed-title">Testo scorrevole</h2>
+    <label>Testo
+      <input type="text" id="ed-text" maxlength="200" required>
+    </label>
+    <div class="row">
+      <label style="display:flex;align-items:center;gap:10px">Colore testo <input type="color" id="ed-color"></label>
+      <label style="display:flex;align-items:center;gap:10px">Velocità (LED/s)
+        <input type="range" id="ed-speed" min="5" max="60" step="1">
+      </label>
+    </div>
+    <div class="actions">
+      <button type="button" class="ghost" id="ed-cancel">Annulla</button>
+      <button type="submit">Salva</button>
+    </div>
+  </form>
+</div><script>
+(function () {
+  var canvas = document.getElementById('led');
+  var ed = document.getElementById('editor');
+  var form = document.getElementById('ed-form');
+  var current = {};
+  function open() {
+    window.pixel.getConfig().then(function (c) {
+      current = c;
+      document.getElementById('ed-text').value = c.text || '';
+      document.getElementById('ed-color').value = c.color || '#ff5a36';
+      document.getElementById('ed-speed').value = c.speed || 20;
+      ed.classList.add('open');
+      document.getElementById('ed-text').focus();
+    });
+  }
+  function close() { ed.classList.remove('open'); }
+  canvas.addEventListener('dblclick', function () {
+    if (window.pixelMode && window.pixelMode() !== 0) return; // solo in modalità scorrimento testo
+    open();
+  });
+  document.getElementById('ed-cancel').onclick = close;
+  ed.addEventListener('click', function (e) { if (e.target === ed) close(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var next = Object.assign({}, current, {
+      text: document.getElementById('ed-text').value.trim() || 'PixelClock',
+      color: document.getElementById('ed-color').value,
+      speed: Number(document.getElementById('ed-speed').value)
+    });
+    window.pixel.saveConfig(next);
+    close();
+  });
+})();
+</script></body>
 </html>
+
+
 
 
 
