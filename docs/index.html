@@ -43,9 +43,16 @@
       background: #ff5a36; color: #fff; font: bold 11px sans-serif; cursor: pointer; padding: 0;
     }
   </style>
+<style>
+  /* Versione web: stessa finestra desktop (560x182), centrata nella pagina. */
+  html, body { background: #1b1b1b; height: 100%; overflow: auto; }
+  body { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+  .stage { position: relative; width: 560px; height: 182px; flex: none; }
+  .stage .bezel { position: absolute; inset: 22px 8px 8px 8px; }
+</style>
 </head>
 <body>
-  <div class="bezel"><canvas id="led"></canvas></div>
+  <div class="stage"><div class="bezel"><canvas id="led"></canvas></div></div>
   <button id="next" title="Modulo successivo"></button>
   <button id="variant" title="Variante (font/colore/scena)"></button>
   <div class="btns">
@@ -57,4 +64,5 @@
   <script src="renderer.js"></script>
 </body>
 </html>
+
 
