@@ -1,0 +1,60 @@
+﻿<!-- index.html â€” Finestra del display: cornice, canvas LED 64x16, pulsanti impostazioni/chiudi. -->
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'">
+  <title>PixelClock</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: transparent; overflow: hidden; }
+    .bezel {
+      position: absolute; inset: 22px 8px 8px 8px;
+      background: #eceae4; border-radius: 14px;
+      box-shadow: 0 4px 14px rgba(0,0,0,.35);
+      -webkit-app-region: drag;
+      display: flex; align-items: center; justify-content: center;
+    }
+    canvas { background: #050505; border-radius: 6px; }
+    /* Pulsante rosso "fisico" sopra la cornice, come la manopola della Pixbar */
+    #next {
+      position: absolute; top: 8px; left: 40px; width: 34px; height: 18px;
+      border: 0; border-radius: 6px 6px 2px 2px; padding: 0; cursor: pointer;
+      background: linear-gradient(#ff6a4a, #e0391c);
+      box-shadow: inset 0 -3px 0 rgba(0,0,0,.2);
+      -webkit-app-region: no-drag;
+    }
+    #next:active { transform: translateY(2px); box-shadow: none; }
+    /* Pulsante blu: cicla una variante del modulo attivo (font, colore, scena) */
+    #variant {
+      position: absolute; top: 8px; left: 80px; width: 34px; height: 18px;
+      border: 0; border-radius: 6px 6px 2px 2px; padding: 0; cursor: pointer;
+      background: linear-gradient(#4aa4ff, #1c6fe0);
+      box-shadow: inset 0 -3px 0 rgba(0,0,0,.2);
+      -webkit-app-region: no-drag;
+    }
+    #variant:active { transform: translateY(2px); box-shadow: none; }
+    .btns {
+      position: absolute; top: 26px; right: 14px; display: flex; gap: 6px;
+      opacity: 0; transition: opacity .2s; -webkit-app-region: no-drag;
+    }
+    body:hover .btns { opacity: 1; }
+    .btns button {
+      width: 18px; height: 18px; border: 0; border-radius: 50%;
+      background: #ff5a36; color: #fff; font: bold 11px sans-serif; cursor: pointer; padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="bezel"><canvas id="led"></canvas></div>
+  <button id="next" title="Modulo successivo"></button>
+  <button id="variant" title="Variante (font/colore/scena)"></button>
+  <div class="btns">
+    <button id="settings" title="Modifica testo (config.json)">âš™</button>
+    <button id="close" title="Chiudi">Ã—</button>
+  </div>
+  <script src="shim.js"></script><script src="font.js"></script>
+  <script src="fonts/clockFonts.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>
+
